@@ -3,6 +3,8 @@ go
 
 set transaction isolation level read uncommitted
 
+declare @servicer varchar(300) = 'ServicerRaw_%'
+
 --executions rolled up
 ;with cte as
 (
@@ -17,7 +19,7 @@ set transaction isolation level read uncommitted
 		from [catalog].[execution_parameter_values]
 		where parameter_data_type = 'String'
 			and parameter_name = 'ProcessDB'
-			and parameter_value = 'ServicerRaw_Cenlar'            --@parmaterize
+			and convert(varchar(300), parameter_value) like @servicer
 	) a
 	inner join [internal].[execution_info] b
 		on b.execution_id = a.execution_id
@@ -59,7 +61,7 @@ cross apply (
 ) b(statusList)
 order by
 	created_date desc
-
+option(recompile)
 
 --execution summary showing process (data) date
 select
@@ -89,7 +91,7 @@ from (
 	from [catalog].[execution_parameter_values]
 	where parameter_data_type = 'String'
 		and parameter_name = 'ProcessDB'
-		and parameter_value = 'ServicerRaw_Cenlar'       --@parmaterize
+		and convert(varchar(300), parameter_value) like @servicer
 ) a
 inner join [internal].[execution_info] b
 	on b.execution_id = a.execution_id
