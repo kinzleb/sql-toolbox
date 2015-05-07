@@ -36,6 +36,6 @@ select top 100
 	a.max_rows
 from sys.dm_exec_query_stats a
 cross apply sys.dm_exec_sql_text(a.[sql_handle]) b
-cross apply sys.dm_exec_query_plan(a.plan_handle) c
+outer apply sys.dm_exec_query_plan(a.plan_handle) c
 order by
 	a.last_elapsed_time desc
