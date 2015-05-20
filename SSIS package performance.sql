@@ -115,3 +115,22 @@ cross apply (
 order by
 	b.[created_time] desc
 option(recompile)
+
+
+--kill a running execution
+/*
+exec [SSISDB].[catalog].[stop_operation] @operation_id=721807
+
+select *
+from [AdminUtils].[dbo].[Glass4LoadQueue]
+where LQE_DatabaseName = 'ServicerRaw_Ocwen'
+order by LQE_ProcessDate
+
+update a
+set
+	LQE_ProcessStartDateTime = null,
+	LQE_ProcessCompleteDateTime = null,
+	LQE_ProcessAuditID = null
+from [AdminUtils].[dbo].[Glass4LoadQueue] a
+where a.LQE_QueueID = -2147481591
+*/

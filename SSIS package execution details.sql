@@ -4,7 +4,52 @@ go
 set transaction isolation level read uncommitted
 
 --SET THIS!
-declare @execution_id int = 674414
+declare @execution_id int = 747371
+
+--excution task details of leaf level tasks only
+if object_id('tempdb..#results') is not null drop table #results
+create table #results (
+	execution_path varchar(900) not null primary key clustered,
+	execution_duration bigint,
+	start_time datetime,
+	end_time datetime,
+	execution_result int
+)
+
+insert #results
+select
+	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path), ''), a.execution_path) as execution_path,
+	sum(a.execution_duration) as execution_duration,
+	min(a.start_time) as start_time,
+	max(a.end_time) as end_time,
+	max(a.execution_result) as execution_result
+from [catalog].[executable_statistics] a
+where a.execution_id = @execution_id
+group by
+	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path), ''), a.execution_path)
+option(recompile)
+
+select
+	a.execution_path,
+	(a.execution_duration / 1000.) / 60. as execution_duration_minutes,
+	a.start_time,
+	a.end_time,
+	case a.execution_result
+		when 0 then 'Success'
+		when 1 then 'Failure'
+		when 2 then 'Completion'
+		when 3 then 'Cancelled'
+	end as execution_result
+from #results a
+where not exists (
+		select *
+		from #results a1
+		where a1.execution_path <> a.execution_path
+			and a1.execution_path like a.execution_path + '%'
+	)
+order by
+	execution_duration_minutes desc
+
 
 --execution message detail
 select
@@ -47,23 +92,4 @@ where event_name not like '%validate%'
 	and operation_id = @execution_id
 order by
 	message_time desc
-option(recompile)
-
-
---excution task details
-select
-	(execution_duration / 1000.) / 60. as execution_duration_minutes,
-	start_time,
-	end_time,
-	case execution_result
-		when 0 then 'Success'
-		when 1 then 'Failure'
-		when 2 then 'Completion'
-		when 3 then 'Cancelled'
-	end as execution_result,
-	execution_path
-from [catalog].[executable_statistics]
-where execution_id = @execution_id
-order by
-	execution_duration_minutes desc
 option(recompile)
