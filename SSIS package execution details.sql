@@ -4,7 +4,7 @@ go
 set transaction isolation level read uncommitted
 
 --SET THIS!
-declare @execution_id int = 747371
+declare @execution_id int = 796606
 
 --excution task details of leaf level tasks only
 if object_id('tempdb..#results') is not null drop table #results
@@ -89,6 +89,7 @@ select
 	[execution_path]
 from [catalog].[event_messages]
 where event_name not like '%validate%'
+	and event_name like '%error%'
 	and operation_id = @execution_id
 order by
 	message_time desc
