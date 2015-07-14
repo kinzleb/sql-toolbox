@@ -32,19 +32,28 @@ order by
 	c.LatestLoadDate desc
 
 
---Loans Boarded by Month
+--Loans Boarded by Data Date
 select
-	year(LNS_RowStartDate) as Year,
-	month(LNS_RowStartDate) as Month,
-	count(0) as LoansBoarded
-from [DW].[Loans] (nolock)
-where LNS_PartyID = -2147483646
+	a.LNS_RowStartDate as DataDate,
+	count(0) as LoansBoarded,
+	max(b.LoansLastUpdated) as LoansLastUpdated
+from [DW].[Loans] a (nolock)
+left outer join (
+	select
+		a.LNS_RowChangeDate,
+		count(0) as LoansLastUpdated
+	from [DW].[Loans] a (nolock)
+	group by
+		a.LNS_RowChangeDate
+) b
+	on b.LNS_RowChangeDate = a.LNS_RowStartDate
+where a.LNS_PartyID = -2147483646
 group by
-	year(LNS_RowStartDate),
-	month(LNS_RowStartDate)
+	a.LNS_RowStartDate,
+	year(a.LNS_RowStartDate),
+	month(a.LNS_RowStartDate)
 order by
-	year(LNS_RowStartDate),
-	month(LNS_RowStartDate)
+	a.LNS_RowStartDate
 
 
 --Files not yet processed
