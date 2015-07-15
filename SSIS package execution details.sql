@@ -4,7 +4,7 @@ go
 set transaction isolation level read uncommitted
 
 --SET THIS!
-declare @execution_id int = 796606
+declare @execution_id int = 588271
 
 --excution task details of leaf level tasks only
 if object_id('tempdb..#results') is not null drop table #results
@@ -18,7 +18,7 @@ create table #results (
 
 insert #results
 select
-	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path), ''), a.execution_path) as execution_path,
+	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path) - charindex('[', a.execution_path), ''), a.execution_path) as execution_path,
 	sum(a.execution_duration) as execution_duration,
 	min(a.start_time) as start_time,
 	max(a.end_time) as end_time,
@@ -26,7 +26,7 @@ select
 from [catalog].[executable_statistics] a
 where a.execution_id = @execution_id
 group by
-	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path), ''), a.execution_path)
+	isnull(stuff(a.execution_path, charindex('[', a.execution_path), charindex(']', a.execution_path) - charindex('[', a.execution_path), ''), a.execution_path)
 option(recompile)
 
 select
