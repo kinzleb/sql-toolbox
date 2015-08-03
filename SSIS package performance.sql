@@ -133,4 +133,17 @@ set
 	LQE_ProcessAuditID = null
 from [AdminUtils].[dbo].[Glass4LoadQueue] a
 where a.LQE_QueueID = -2147481591
+
+--insert [AdminUtils].[dbo].[Glass4LoadQueue]
+select
+	'union all select LQE_RowStartDateTime=''' + convert(varchar, getdate(), 120) + ''', LQE_AuditInsertID=0, LQE_ServerName=''' + @@servername + ''', LQE_DatabaseName=''' + db_name() + ''', LQE_ProjectName=''GLASS4 Load'', LQE_ProcessDate=''' + convert(varchar, a.RA_DataDate) + ''', LQE_ProcessStartDateTime=null, LQE_ProcessCompleteDateTime=null, LQE_ProcessAuditID=null'
+from (
+	select
+		RA_DataDate
+	from cenlar.RadianExtract
+	group by
+		RA_DataDate
+) a
+order by
+	a.RA_DataDate
 */
