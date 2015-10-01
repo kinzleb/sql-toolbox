@@ -10,6 +10,7 @@ select
     count(0) as NumLoans,
 	min(a.LNS_RowStartDate) as DataStartDate,
 	max(a.LNS_RowChangeDate) as DataEndDate,
+	c.DistinctDataDates,
 	c.InitialLoadDate,
 	c.LatestLoadDate
 from [DW].[Loans] a
@@ -19,7 +20,8 @@ left outer join (
 	select
 		LP_PartyID,
 		min(LP_PopulationDateTime) as InitialLoadDate,
-		max(LP_PopulationDateTime) as LatestLoadDate
+		max(LP_PopulationDateTime) as LatestLoadDate,
+		count(distinct LP_ProcessDate) as DistinctDataDates
 	from [Metric].[LoadPopulation]
 	group by
 		LP_PartyID
@@ -29,7 +31,8 @@ group by
 	b.[DP_DataProviderID],
     b.[DP_DataProviderName],
 	c.InitialLoadDate,
-	c.LatestLoadDate
+	c.LatestLoadDate,
+	c.DistinctDataDates
 order by
 	c.LatestLoadDate desc
 
