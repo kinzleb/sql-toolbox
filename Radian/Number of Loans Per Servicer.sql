@@ -1,6 +1,8 @@
 use glass4
 go
 
+set transaction isolation level read uncommitted
+
 --Loans Loaded to date
 select
 	b.[DP_DataProviderID] as DataProviderID,
@@ -10,15 +12,15 @@ select
 	max(a.LNS_RowChangeDate) as DataEndDate,
 	c.InitialLoadDate,
 	c.LatestLoadDate
-from [DW].[Loans] (nolock) a
-inner join [ETL].[DataProviderExt] (nolock)  b
+from [DW].[Loans] a
+inner join [ETL].[DataProviderExt] b
     on b.[DP_DataProviderID] = a.LNS_PartyID
 left outer join (
 	select
 		LP_PartyID,
 		min(LP_PopulationDateTime) as InitialLoadDate,
 		max(LP_PopulationDateTime) as LatestLoadDate
-	from [Metric].[LoadPopulation] (nolock) 
+	from [Metric].[LoadPopulation]
 	group by
 		LP_PartyID
 ) c
@@ -43,8 +45,8 @@ from (
 	select
 		a.LN_RowStartDate as DataDate,
 		count(0) as LoansWithNewInfo
-	from DW.Loan a (nolock)
-	inner join DW.Loans b (nolock)
+	from DW.Loan a
+	inner join DW.Loans b
 		on b.LNS_LoansID = a.LN_LoansID
 	where b.LNS_PartyID = @PartyID
 	group by
@@ -54,7 +56,7 @@ left outer join (
 	select
 		a.LNS_RowChangeDate,
 		count(0) as LoansLastUpdated
-	from [DW].[Loans] a (nolock)
+	from [DW].[Loans] a
 	where a.LNS_PartyID = @PartyID
 	group by
 		a.LNS_RowChangeDate
@@ -64,7 +66,7 @@ left outer join (
 	select
 		a.LNS_RowStartDate,
 		count(0) as LoansBoarded
-	from DW.Loans a (nolock)
+	from DW.Loans a
 	where a.LNS_PartyID = @PartyID
 	group by
 		a.LNS_RowStartDate
