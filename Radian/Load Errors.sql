@@ -5,7 +5,8 @@ set transaction isolation level read uncommitted
 
 declare
 	@PartyID int = -2147483282,
-	@LoadDateStart datetime = '2015-07-30 13:00:00'
+	@LoadDateStart datetime = '2015-07-30 13:00:00',
+	@ErrorPackageName nvarchar(255) = 'DelinquencyEvent'
 
 select
 	b.DP_DataProviderName as DataProviderName,
@@ -45,3 +46,12 @@ group by
 	LE_ErrorPackageName
 order by
 	count(0) desc
+
+
+select *
+from Metric.LoadError
+where LE_PartyID = @PartyID
+	and LE_ErrorDatetime >= @LoadDateStart
+	and LE_ErrorPackageName =  @ErrorPackageName
+order by
+	LE_ErrorDatetime desc
