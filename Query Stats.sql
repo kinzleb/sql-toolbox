@@ -37,5 +37,6 @@ select top 100
 from sys.dm_exec_query_stats a
 cross apply sys.dm_exec_sql_text(a.[sql_handle]) b
 outer apply sys.dm_exec_query_plan(a.plan_handle) c
+--where object_name(b.objectid, b.dbid) = 'getMEDExistingSCD'
 order by
 	a.last_elapsed_time desc
