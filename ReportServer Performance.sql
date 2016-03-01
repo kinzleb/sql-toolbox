@@ -1,6 +1,8 @@
 use ReportServer
 go
 
+set transaction isolation level read uncommitted
+
 select
 	a.ItemPath,
 	b.DataSource,
@@ -20,7 +22,7 @@ from (
 		b.DataSet.value('./Name[1]', 'varchar(max)') as DataSet,
 		b.DataSet.value('./TotalTimeDataRetrieval[1]', 'int') as DataSetRetrieval,
 		b.DataSet.value('./RowsRead[1]', 'int') as DataSetRowCount
-	from [dbo].[ExecutionLog3] a (nolock)
+	from [dbo].[ExecutionLog3] a
 	cross apply AdditionalInfo.nodes('/AdditionalInfo/Connections/Connection/DataSets/DataSet') b(DataSet)
 	where a.[Source] <> 'Cache'
 ) a
@@ -28,10 +30,10 @@ inner join (
 	select
 		a.[Path],
 		c.[Path] as DataSource
-	from dbo.[Catalog] a (nolock)
-	inner join dbo.DataSource b (nolock)
+	from dbo.[Catalog] a
+	inner join dbo.DataSource b
 		on b.ItemID = a.ItemID
-	inner join dbo.[Catalog] c (nolock)
+	inner join dbo.[Catalog] c
 		on c.ItemID = b.link
 	where a.[Type] in (2,6)
 ) b

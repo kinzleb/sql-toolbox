@@ -58,5 +58,7 @@ select
 ,       login_name
 ,       [user_name]
 ,       application_name
-from @temp_trace where object_type not in (21587) -- don''t bother with auto-statistics as it generates too much noise
+from @temp_trace
+where object_type not in (21587) --don't bother with auto-statistics as it generates too much noise
+	--and user_name not in ('svcSqlAgent', 'svcContinuousBuild')
 order by start_time desc;
