@@ -4,7 +4,7 @@ go
 set transaction isolation level read uncommitted
 
 --SET THIS!
-declare @servicer varchar(300) = 'ServicerRaw_%'
+declare @servicer varchar(300) = '%%'
 
 --executions rolled up
 if object_id('tempdb..#results') is not null drop table #results
@@ -21,7 +21,7 @@ from (
 		convert(varchar(300), parameter_value) as servicer
 	from [catalog].[execution_parameter_values]
 	where parameter_data_type = 'String'
-		and parameter_name = 'ProcessDB'
+		and parameter_name = 'DataProviderPackage'
 		and convert(varchar(300), parameter_value) like @servicer
 ) a
 inner join [internal].[execution_info] b
@@ -74,7 +74,6 @@ order by
 select
 	a.servicer,
 	datediff(mi, b.start_time, b.end_time) as duration_minutes,
-	c.ProcessDate,
 	b.[created_time],
 	b.[execution_id],
 	b.[folder_name],
@@ -99,19 +98,11 @@ from (
 		convert(varchar(300), parameter_value) as servicer
 	from [catalog].[execution_parameter_values]
 	where parameter_data_type = 'String'
-		and parameter_name = 'ProcessDB'
+		and parameter_name = 'DataProviderPackage'
 		and convert(varchar(300), parameter_value) like @servicer
 ) a
 inner join [internal].[execution_info] b
 	on b.execution_id = a.execution_id
-cross apply (
-	select top 1
-		convert(datetime, parameter_value) as ProcessDate
-	from [catalog].[execution_parameter_values] c1
-	where c1.parameter_data_type = 'DateTime'
-		and c1.parameter_name = 'ProcessDate'
-		and c1.execution_id = a.execution_id
-) c
 order by
 	b.[created_time] desc
 option(recompile)
