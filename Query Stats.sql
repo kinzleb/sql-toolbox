@@ -7,6 +7,7 @@ select top 100
 	c.query_plan,
 	a.plan_generation_num,
 	convert(decimal(9,2), ((a.total_elapsed_time/a.execution_count*1.) / 1000000.) / 60.) as avg_elapsed_time_minutes,
+	convert(decimal(9,2), ((a.total_elapsed_time/a.execution_count*1.) / 1000000.)) as avg_elapsed_time_seconds,
 	a.creation_time,
 	a.last_execution_time,
 	a.execution_count,
@@ -37,6 +38,6 @@ select top 100
 from sys.dm_exec_query_stats a
 cross apply sys.dm_exec_sql_text(a.[sql_handle]) b
 outer apply sys.dm_exec_query_plan(a.plan_handle) c
---where object_name(b.objectid, b.dbid) = 'getMEDExistingSCD'
+where db_name(b.dbid) = 'Analytics'
 order by
 	a.last_elapsed_time desc
